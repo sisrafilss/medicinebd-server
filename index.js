@@ -30,14 +30,33 @@ async function run() {
     // POST - Save user info to user collection
     app.post("/users", async (req, res) => {
       const newUser = req.body;
-      console.log(newUser);
       const result = await userCollection.insertOne(newUser);
       res.json(result);
-      console.log(result);
     });
 
+    // PUT - Update user data to database for third party login system
+    app.put("/users", async (req, res) => {
+      const userData = req.body;
+      const filter = { email: userData.email };
+      const options = { upsert: true };
+      const updateDoc = { $set: userData };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.json(result);
+    });
 
-
+    // GET - Admin Status.
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await userCollection.findOne(query);
+      let isAdmin = false;
+      if (result?.role === "admin") {
+        isAdmin = true;
+        res.json({ admin: isAdmin });
+      } else {
+        res.json({ admin: isAdmin });
+      }
+    });
   } finally {
     // await client.close();
   }
