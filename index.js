@@ -10,6 +10,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Database Info
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.quv1r.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -21,6 +22,22 @@ async function run() {
     await client.connect();
 
     console.log("database connected successfully");
+
+    // Collections
+    const database = client.db("madicinebd_DB");
+    const userCollection = database.collection("users");
+
+    // POST - Save user info to user collection
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      console.log(newUser);
+      const result = await userCollection.insertOne(newUser);
+      res.json(result);
+      console.log(result);
+    });
+
+
+
   } finally {
     // await client.close();
   }
