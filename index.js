@@ -26,7 +26,9 @@ async function run() {
     // Collections
     const database = client.db("madicinebd_DB");
     const userCollection = database.collection("users");
+    const productCollection = database.collection("users");
 
+    /* ========================= User Collection START ======================= */
     // POST - Save user info to user collection
     app.post("/users", async (req, res) => {
       const newUser = req.body;
@@ -57,6 +59,49 @@ async function run() {
         res.json({ admin: isAdmin });
       }
     });
+    /* ========================= User Collection END ======================= */
+
+    /* ========================= Product Collection START ======================= */
+
+ /* 
+    const products = {
+      title: "Thai Adult Diaper",
+      price: 232,
+      image: "ImgURL",
+      description: "description",
+      category: "baby-and-mom-care",
+    };
+ */
+
+    // POST - Add a product by - Admin
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.json(result);
+    });
+
+    // Delete - Delete a product by user
+    app.delete("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productCollection.deleteOne(query);
+      res.json({ _id: id, deletedCount: result.deletedCount });
+    });
+
+    // GET - Get all product of a specific category
+    app.get("/products", async (req, res) => {
+      const category = req.params.id;
+      const query = { category: category };
+      const cursor = productCollection.find(query);
+      if ((await cursor.count()) > 0) {
+        const products = await cursor.toArray();
+        res.json(products);
+      } else {
+        res.json({ message: "Product Not Found!" });
+      }
+    });
+
+    /* ========================= Product Collection END ======================= */
   } finally {
     // await client.close();
   }
