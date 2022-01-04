@@ -64,10 +64,7 @@ async function run() {
     });
     /* ========================= User Collection END ======================= */
 
-
-
     /* ========================= Product Collection START ======================= */
-
 
     // GET - Get all product of a specific category
     app.get("/products", async (req, res) => {
@@ -109,14 +106,19 @@ async function run() {
       res.json({ _id: id, deletedCount: result.deletedCount });
     });
 
-    
-
     /* ========================= Product Collection END ======================= */
 
+    /* ========================= Banner Collection START ======================= */
 
-/* ========================= Banner Collection START ======================= */
-     // POST - Add a banner by - Admin
-     app.post("/banners", async (req, res) => {
+    // GET - Get all banners
+    app.get("/banners", async (req, res) => {
+      const cursor = bannerCollection.find({});
+      const products = await cursor.toArray();
+      res.json(products);
+    });
+
+    // POST - Add a banner by - Admin
+    app.post("/banners", async (req, res) => {
       // Extract image data and convert it to binary base 64
       const pic = req.files.image;
       const picData = pic.data;
@@ -133,8 +135,7 @@ async function run() {
       res.json(result);
     });
 
-/* ========================= Banner Collection END ======================= */
-
+    /* ========================= Banner Collection END ======================= */
   } finally {
     // await client.close();
   }
