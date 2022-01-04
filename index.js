@@ -2,6 +2,7 @@ const express = require("express");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
+const fileUpload = require("express-fileupload");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -9,6 +10,7 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors());
 app.use(express.json());
+app.use(fileUpload());
 
 // Database Info
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.quv1r.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -61,21 +63,24 @@ async function run() {
     });
     /* ========================= User Collection END ======================= */
 
+
+
     /* ========================= Product Collection START ======================= */
-
- /* 
-    const products = {
-      title: "Thai Adult Diaper",
-      price: 232,
-      image: "ImgURL",
-      description: "description",
-      category: "baby-and-mom-care",
-    };
- */
-
     // POST - Add a product by - Admin
     app.post("/products", async (req, res) => {
-      const product = req.body;
+      // Extract image data and convert it to binary base 64
+      const pic = req.files.image;
+      const picData = pic.data;
+      const encodedPic = picData.toString("base64");
+      const imageBuffer = Buffer.from(encodedPic, "base64");
+      // Extract other information and make our product object including image for saveing into MongoDB
+      const { category, name, description, price } = req.body;
+      const product = {
+        category,
+        name,
+        description: description.split("\n"),
+        image: imageBuffer,
+      };
       const result = await productCollection.insertOne(product);
       res.json(result);
     });
