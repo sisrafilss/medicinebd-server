@@ -25,10 +25,11 @@ async function run() {
 
     console.log("database connected successfully");
 
-    // Collections
     const database = client.db("madicinebd_DB");
+    // Collections
     const userCollection = database.collection("users");
-    const productCollection = database.collection("users");
+    const productCollection = database.collection("products");
+    const bannerCollection = database.collection("banners");
 
     /* ========================= User Collection START ======================= */
     // POST - Save user info to user collection
@@ -66,6 +67,21 @@ async function run() {
 
 
     /* ========================= Product Collection START ======================= */
+
+
+    // GET - Get all product of a specific category
+    app.get("/products", async (req, res) => {
+      const category = req.params.id;
+      const query = { category: category };
+      const cursor = productCollection.find(query);
+      if ((await cursor.count()) > 0) {
+        const products = await cursor.toArray();
+        res.json(products);
+      } else {
+        res.json({ message: "Product Not Found!" });
+      }
+    });
+
     // POST - Add a product by - Admin
     app.post("/products", async (req, res) => {
       // Extract image data and convert it to binary base 64
@@ -93,20 +109,32 @@ async function run() {
       res.json({ _id: id, deletedCount: result.deletedCount });
     });
 
-    // GET - Get all product of a specific category
-    app.get("/products", async (req, res) => {
-      const category = req.params.id;
-      const query = { category: category };
-      const cursor = productCollection.find(query);
-      if ((await cursor.count()) > 0) {
-        const products = await cursor.toArray();
-        res.json(products);
-      } else {
-        res.json({ message: "Product Not Found!" });
-      }
-    });
+    
 
     /* ========================= Product Collection END ======================= */
+
+
+/* ========================= Banner Collection START ======================= */
+     // POST - Add a banner by - Admin
+     app.post("/banners", async (req, res) => {
+      // Extract image data and convert it to binary base 64
+      const pic = req.files.image;
+      const picData = pic.data;
+      const encodedPic = picData.toString("base64");
+      const imageBuffer = Buffer.from(encodedPic, "base64");
+      // Extract other information and make our product object including image for saveing into MongoDB
+      const { title, description } = req.body;
+      const banner = {
+        title,
+        description,
+        image: imageBuffer,
+      };
+      const result = await bannerCollection.insertOne(banner);
+      res.json(result);
+    });
+
+/* ========================= Banner Collection END ======================= */
+
   } finally {
     // await client.close();
   }
