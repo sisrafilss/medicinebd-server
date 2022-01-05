@@ -118,12 +118,20 @@ async function run() {
       res.json(products);
     });
 
-     // GET - Get all banners
-     app.delete("/banners/:id", async (req, res) => {
+    // GET - Get all banners
+    app.delete("/banners/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await bannerCollection.deleteOne(query);
       res.json({ _id: id, deletedCount: result.deletedCount });
+    });
+
+    // GET - Single Banner Detail
+    app.get("/banners/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const banner = await bannerCollection.findOne(query);
+      res.json(banner);
     });
 
     // POST - Add a banner by - Admin
@@ -142,6 +150,33 @@ async function run() {
       };
       const result = await bannerCollection.insertOne(banner);
       res.json(result);
+    });
+
+    // PUT - Update a banner
+    app.put("/banners", async (req, res) => {
+      // Extract image data and convert it to binary base 64
+      const pic = req.files.image;
+      const picData = pic.data;
+      const encodedPic = picData.toString("base64");
+      const imageBuffer = Buffer.from(encodedPic, "base64");
+
+      // Extract other information and make our product object including image for saveing into MongoDB
+      const { _id, title, description } = req.body;
+      const banner = {
+        title,
+        description,
+        image: imageBuffer,
+      };
+      console.log("_id", _id);
+      console.log("banner", banner);
+
+      const filter = { _id: ObjectId(_id) };
+      const options = { upsert: false };
+      const updateDoc = { $set: banner };
+      const result = await bannerCollection.updateOne(filter, updateDoc, options);
+      res.json(result);
+      // res.json({ message: "Test" });
+      console.log(result);
     });
 
     /* ========================= Banner Collection END ======================= */
