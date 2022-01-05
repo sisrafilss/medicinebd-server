@@ -49,6 +49,14 @@ async function run() {
       res.json({ _id: result.insertedId, name: category.name });
     });
 
+    // Delete - Delete a Category
+    app.delete("/categories/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await categoryCollection.deleteOne(query);
+      res.json({ _id: id, deletedCount: result.deletedCount });
+    });
+
     /* ========================= Category Collection END ======================= */
 
     /* ========================= User Collection START ======================= */
