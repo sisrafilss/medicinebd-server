@@ -63,6 +63,29 @@ async function run() {
         res.json({ admin: isAdmin });
       }
     });
+
+    // PUT - Set an user role as admin
+    app.put("/make-admin/:id", async (req, res) => {
+      const filter = req.params.id;
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await userCollection.updateOne(
+        { email: filter },
+        updateDoc
+      );
+      res.json(result);
+      console.log(result);
+    });
+
+    app.get("/admins", async (req, res) => {
+      const cursor = userCollection.find({});
+      const users = await cursor.toArray();
+      res.json(users);
+    });
+
     /* ========================= User Collection END ======================= */
 
     /* ========================= Product Collection START ======================= */
@@ -173,7 +196,11 @@ async function run() {
       const filter = { _id: ObjectId(_id) };
       const options = { upsert: false };
       const updateDoc = { $set: banner };
-      const result = await bannerCollection.updateOne(filter, updateDoc, options);
+      const result = await bannerCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.json(result);
       // res.json({ message: "Test" });
       console.log(result);
