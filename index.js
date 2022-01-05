@@ -1,6 +1,7 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
+const ObjectId = require("mongodb").ObjectId;
 require("dotenv").config();
 const fileUpload = require("express-fileupload");
 
@@ -115,6 +116,14 @@ async function run() {
       const cursor = bannerCollection.find({});
       const products = await cursor.toArray();
       res.json(products);
+    });
+
+     // GET - Get all banners
+     app.delete("/banners/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await bannerCollection.deleteOne(query);
+      res.json({ _id: id, deletedCount: result.deletedCount });
     });
 
     // POST - Add a banner by - Admin
