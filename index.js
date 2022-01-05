@@ -31,6 +31,7 @@ async function run() {
     const userCollection = database.collection("users");
     const productCollection = database.collection("products");
     const bannerCollection = database.collection("banners");
+    const testimonialCollection = database.collection("testimonials");
 
     /* ========================= User Collection START ======================= */
     // POST - Save user info to user collection
@@ -207,6 +208,25 @@ async function run() {
     });
 
     /* ========================= Banner Collection END ======================= */
+
+    /* ========================= Testimonial Collection START ======================= */
+    // GET - Get Testimonials
+    app.get("/testimonials", async (req, res) => {
+      const cursor = testimonialCollection.find({});
+      const testimonials = await cursor.toArray();
+      res.json(testimonials);
+    });
+
+    // POST - User Review
+    app.post("/add-review", async (req, res) => {
+      const review = req.body;
+      const result = await testimonialCollection.insertOne(review);
+      res.send(result);
+    });
+
+
+
+    /* ========================= Testimonial Collection END ======================= */
   } finally {
     // await client.close();
   }
