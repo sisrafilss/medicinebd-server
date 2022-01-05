@@ -28,10 +28,28 @@ async function run() {
 
     const database = client.db("madicinebd_DB");
     // Collections
+    const categoryCollection = database.collection("categories");
     const userCollection = database.collection("users");
     const productCollection = database.collection("products");
     const bannerCollection = database.collection("banners");
     const testimonialCollection = database.collection("testimonials");
+
+    /* ========================= Category Collection START ======================= */
+    // GET - All Categories
+    app.get("/categories", async (req, res) => {
+      const cursor = categoryCollection.find({});
+      const categories = await cursor.toArray();
+      res.json(categories);
+    });
+
+    // POST - Add Category
+    app.post("/categories", async (req, res) => {
+      const category = req.body;
+      const result = await categoryCollection.insertOne(category);
+      res.json({ _id: result.insertedId, name: category.name });
+    });
+
+    /* ========================= Category Collection END ======================= */
 
     /* ========================= User Collection START ======================= */
 
@@ -40,7 +58,7 @@ async function run() {
       const cursor = userCollection.find({});
       const users = await cursor.toArray();
       res.json(users);
-    })
+    });
 
     // POST - Save user info to user collection
     app.post("/users", async (req, res) => {
@@ -66,7 +84,6 @@ async function run() {
       const result = await userCollection.deleteOne(query);
       res.json({ _id: id, deletedCount: result.deletedCount });
     });
-
 
     // GET - Admin Status.
     app.get("/users/:email", async (req, res) => {
@@ -240,8 +257,6 @@ async function run() {
       const result = await testimonialCollection.insertOne(review);
       res.send(result);
     });
-
-
 
     /* ========================= Testimonial Collection END ======================= */
   } finally {
